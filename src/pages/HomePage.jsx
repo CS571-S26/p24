@@ -7,14 +7,10 @@ export default function HomePage() {
   const [count, setCount] = useState(0)
   const [movies, setMovies] = useState([])
 
+  const API_KEY = "3cfa185115784f1fd64cccd534a20c13";
+
   useEffect(() => {
-    fetch("https://api.themoviedb.org/3/trending/movie/week", {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MTZhZmY0YjYxM2UwODk5NmVlZGU3MjBhNDk3MmJhNCIsIm5iZiI6MTc3MjY0NjM0My40OTYsInN1YiI6IjY5YTg2ZmM3ZTViZTg3MGI3YzA4MGIwOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.DKyhr7pQIkjzpU7k5Y-C16u0q7tNthc7wzXjAFNaGbU"
-      }
-    })
+    fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`)
       .then(res => res.json())
       .then(data => {
         setMovies(data.results)
@@ -28,7 +24,7 @@ export default function HomePage() {
     <div className="w-100 h-100 d-flex flex-column align-items-center">
       <Card className='m-4 p-2 mb-4'>
         <Card.Body className='text-center'>
-          <h1>Hello World!</h1>
+          <h1>Count Movie!</h1>
           <Button onClick={() => setCount(o => o + 1)}>Count: {count}</Button>
         </Card.Body>
       </Card>
@@ -45,7 +41,8 @@ export default function HomePage() {
                 alt={movie.title}
               />
               <Card.Body>
-                <Card.Title>{movie.title}</Card.Title>
+                <Card.Title>{movie.name ? movie.name : movie.title}</Card.Title>
+                <div>Rating: {movie.vote_average}</div>
               </Card.Body>
             </Card>
           </Col>
