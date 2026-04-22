@@ -35,17 +35,4 @@ MOViE? is a movie & TV discovery website that helps you quickly decide what to w
 
 ---
 
-## Local Development
 
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Build for GitHub Pages
-npm run build
-```
-
-> Requires a `.env` file with `VITE_TMDB_API_KEY` and Firebase config keys. See `.env.example`.
