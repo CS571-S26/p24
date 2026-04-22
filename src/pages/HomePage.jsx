@@ -17,7 +17,7 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true)
   const [activeQuery, setActiveQuery] = useState('')
 
-  const API_KEY = '3cfa185115784f1fd64cccd534a20c13'
+  const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
   const fetchMoviesPage = ({ searchQuery = '', pageToLoad = 1, append = false }) => {
     const trimmedQuery = searchQuery.trim()
