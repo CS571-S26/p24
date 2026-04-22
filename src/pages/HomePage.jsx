@@ -3,6 +3,7 @@ import '../App.css'
 import { Card, Row, Col } from 'react-bootstrap'
 import { useLocation } from 'react-router-dom'
 import MovieSearchBar from '../components/MovieSearchBar'
+import WatchlistButton from '../components/WatchlistButton'
 
 export default function HomePage() {
   const location = useLocation()
@@ -259,6 +260,7 @@ export default function HomePage() {
                     <Card.Title className="movie-card-title">
                       {getTitle(movie)}
                     </Card.Title>
+                    <WatchlistButton movie={movie} />
                   </Card.Body>
                 </Card>
               </Col>
