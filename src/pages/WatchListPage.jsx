@@ -13,7 +13,7 @@ export default function WatchListPage() {
         <Container className="p-0" style={{ maxWidth: '900px' }}>
           <Card className="m-2 p-2 text-center">
             <Card.Body>
-              <h2 className="mb-3">My Watchlist</h2>
+              <h1 className="mb-3 fs-3">My Watchlist</h1>
               <p className="text-muted mb-3">Sign in to save and view your watchlist.</p>
               <Button as={Link} to="/sign-in" variant="warning">Sign In / Sign Up</Button>
             </Card.Body>
@@ -26,7 +26,7 @@ export default function WatchListPage() {
   return (
     <div className="w-100 d-flex justify-content-center align-items-start py-4 px-3">
       <Container className="p-0" style={{ maxWidth: '1100px' }}>
-        <h2 className="mb-4 px-2">My Watchlist</h2>
+        <h1 className="mb-4 px-2">My Watchlist</h1>
 
         {items.length === 0 ? (
           <Card className="m-2 p-2 text-center">

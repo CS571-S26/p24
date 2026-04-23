@@ -19,7 +19,7 @@ export default function AboutPage() {
 
         <Card className="m-2 p-2 mb-4">
           <Card.Body>
-            <h2 className="mb-3">About MOViE?</h2>
+            <h1 className="mb-3">About MOViE?</h1>
             <p className="mb-0">
               It's almost midnight. The food is ready, the lights are dimmed — but your hand keeps
               scrolling endlessly trying to find something worth watching. <strong>MOViE?</strong> is
@@ -32,7 +32,7 @@ export default function AboutPage() {
 
         <Card className="m-2 p-2 mb-4">
           <Card.Body>
-            <h3 className="mb-3">Tech Stack</h3>
+            <h2 className="mb-3">Tech Stack</h2>
             <Row className="g-2">
               {STACK.map(item => (
                 <Col key={item.name} xs={12} sm={6}>
@@ -55,7 +55,7 @@ export default function AboutPage() {
 
         <Card className="m-2 p-2">
           <Card.Body>
-            <h3 className="mb-2">Developer</h3>
+            <h2 className="mb-2">Developer</h2>
             <p className="mb-0">
               Built by <strong>Hazim Shah and Amirul Azmi</strong> for CS571 — Building User Interfaces,
               UW–Madison, Spring 2026.

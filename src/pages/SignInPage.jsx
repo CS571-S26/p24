@@ -71,6 +71,7 @@ export default function SignInPage() {
       <Container className="p-0" style={{ maxWidth: '500px' }}>
         <Card className="m-2 p-2">
           <Card.Body>
+            <h1 className="mb-3 fs-3">Welcome to MOViE?</h1>
             <Tabs
               activeKey={activeTab}
               onSelect={k => setActiveTab(k)}

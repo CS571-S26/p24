@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import '../App.css'
 import { Card, Row, Col } from 'react-bootstrap'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import MovieSearchBar from '../components/MovieSearchBar'
 import WatchlistButton from '../components/WatchlistButton'
 
 export default function HomePage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const sentinelRef = useRef(null)
   const [movies, setMovies] = useState([])
   const [selectedMovie, setSelectedMovie] = useState(null)
@@ -221,12 +222,7 @@ export default function HomePage() {
             isSearching={isSearching}
           />
 
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h2 className="section-title mb-0">Quick picks</h2>
-            <span className="text-muted small">
-              Tap a card to preview its rating & mood
-            </span>
-          </div>
+          <h2 className="section-title mb-3">Quick picks</h2>
 
           {error && <p className="search-message mb-3">{error}</p>}
 
@@ -234,10 +230,8 @@ export default function HomePage() {
             {movies.map(movie => (
               <Col key={movie.id} xs={12} sm={6} md={4} lg={3}>
                 <Card
-                  className={`movie-card ${
-                    selectedMovie?.id === movie.id ? 'movie-card-active' : ''
-                  }`}
-                  onClick={() => setSelectedMovie(movie)}
+                  className="movie-card"
+                  onClick={() => navigate(`/${movie.media_type || 'movie'}/${movie.id}`)}
                 >
                   {movie.poster_path && (
                     <Card.Img

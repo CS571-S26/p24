@@ -42,14 +42,16 @@ export default function Layout() {
           </nav>
 
           <Form className="d-flex align-items-center gap-2 flex-nowrap" onSubmit={handleGlobalSearch}>
-            <Form.Control
-              type="text"
-              size="sm"
-              placeholder="Search movie..."
-              value={globalQuery}
-              onChange={e => setGlobalQuery(e.target.value)}
-              aria-label="Search movie from top navigation"
-            />
+            <Form.Group controlId="navSearch" className="mb-0">
+              <Form.Label className="visually-hidden">Search movies</Form.Label>
+              <Form.Control
+                type="text"
+                size="sm"
+                placeholder="Search movie..."
+                value={globalQuery}
+                onChange={e => setGlobalQuery(e.target.value)}
+              />
+            </Form.Group>
             <Button type="submit" variant="warning" size="sm">Search</Button>
           </Form>
 
