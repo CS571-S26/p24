@@ -5,14 +5,14 @@ import './index.css'
 import App from './App.jsx'
 import { HashRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
-import { WatchlistProvider } from './context/WatchlistContext.jsx'
+import { LibraryProvider } from './context/LibraryContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <HashRouter>
     <AuthProvider>
-      <WatchlistProvider>
+      <LibraryProvider>
         <App />
-      </WatchlistProvider>
+      </LibraryProvider>
     </AuthProvider>
   </HashRouter>
 )

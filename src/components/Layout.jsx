@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Navbar, Container, Form, Button, NavDropdown, Modal, Toast, ToastContainer } from 'react-bootstrap'
 import '../App.css'
 import { useAuth, toUsername } from '../context/AuthContext'
@@ -9,7 +9,12 @@ export default function Layout() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { user, signOut } = useAuth()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   function handleSignOut() {
     setShowConfirm(false)
@@ -37,7 +42,8 @@ export default function Layout() {
 
           <nav className="d-flex align-items-center gap-1 flex-wrap">
             <NavLink to="/" end className={getTabClass}>Home</NavLink>
-            <NavLink to="/watch-list" className={getTabClass}>Watchlist</NavLink>
+            {user && <NavLink to="/browse" className={getTabClass}>Browse</NavLink>}
+            <NavLink to="/library" className={getTabClass}>Library</NavLink>
             <NavLink to="/about" className={getTabClass}>About</NavLink>
           </nav>
 
@@ -61,6 +67,10 @@ export default function Layout() {
               id="user-dropdown"
               align="end"
             >
+              <NavDropdown.Item as={Link} to="/profile">
+                Profile
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
               <NavDropdown.Item onClick={() => setShowConfirm(true)}>
                 Sign Out
               </NavDropdown.Item>

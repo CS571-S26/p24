@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, Container, Form, Button, Tabs, Tab, Alert } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import OnboardingModal from '../components/OnboardingModal'
 
 // Usernames become the local-part of a fake email, so only these chars are safe
 const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/
@@ -22,6 +23,7 @@ export default function SignInPage() {
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState('signin')
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   // Sign-in form state
   const [siUsername, setSiUsername] = useState('')
@@ -61,7 +63,7 @@ export default function SignInPage() {
     setSuError('')
     setSuLoading(true)
     signUp(suUsername, suPassword)
-      .then(() => navigate('/'))
+      .then(() => setShowOnboarding(true))
       .catch(err => setSuError(mapFirebaseError(err.code)))
       .finally(() => setSuLoading(false))
   }
@@ -138,6 +140,11 @@ export default function SignInPage() {
           </Card.Body>
         </Card>
       </Container>
+
+      <OnboardingModal
+        show={showOnboarding}
+        onComplete={() => { setShowOnboarding(false); navigate('/') }}
+      />
     </div>
   )
 }

@@ -32,7 +32,7 @@ export default function WatchlistButton({ movie }) {
         {inList ? '✓ In Watchlist' : '+ Watchlist'}
       </Button>
 
-      <Modal show={showPrompt} onHide={() => setShowPrompt(false)} centered>
+      <Modal show={showPrompt} onHide={() => setShowPrompt(false)} centered onClick={e => e.stopPropagation()}>
         <Modal.Header closeButton>
           <Modal.Title>Sign in to save movies</Modal.Title>
         </Modal.Header>

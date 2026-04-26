@@ -1,5 +1,5 @@
 import { Badge } from 'react-bootstrap'
-import WatchlistButton from './WatchlistButton'
+import LibraryButton from './LibraryButton'
 
 export default function MovieHero({ movie, mediaType }) {
   const title = movie.title || movie.name
@@ -38,7 +38,7 @@ export default function MovieHero({ movie, mediaType }) {
           {runtime && <span className="text-light small">{runtime}</span>}
           {year && <span className="text-light small">{year}</span>}
         </div>
-        <WatchlistButton movie={{ ...movie, media_type: mediaType }} />
+        <LibraryButton movie={{ ...movie, media_type: mediaType }} />
       </div>
     </section>
   )
