@@ -4,6 +4,7 @@ import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import WatchlistHero from '../components/WatchlistHero'
 import MovieRow from '../components/MovieRow'
+import OnboardingModal from '../components/OnboardingModal'
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
@@ -14,7 +15,6 @@ const GENRE_LABELS = {
   10752: 'War', 37: 'Western', 99: 'Documentary', 10765: 'Sci-Fi & Fantasy',
 }
 
-// TMDB JustWatch provider IDs for each service
 const PROVIDER_IDS = {
   netflix: 8,
   hbo:     1899,
@@ -32,19 +32,36 @@ function buildProviderParam(services) {
 
 export default function PersonalizedHome() {
   const { user } = useAuth()
-  const [prefs,          setPrefs]          = useState(null)
-  const [genreRows,      setGenreRows]      = useState([])
-  const [trending,       setTrending]       = useState([])
+  const [prefs,           setPrefs]           = useState(null)
+  const [showOnboarding,  setShowOnboarding]  = useState(false)
+  const [genreRows,       setGenreRows]       = useState([])
+  const [trending,        setTrending]        = useState([])
   const [trendingLoading, setTrendingLoading] = useState(true)
+  const [topRated,        setTopRated]        = useState([])
+  const [topRatedLoading, setTopRatedLoading] = useState(true)
 
-  // Load user preferences
+  // Load prefs + auto-open onboarding once per session if not completed
   useEffect(() => {
     if (!user) return
     const ref = doc(db, 'users', user.uid, 'profile', 'settings')
-    getDoc(ref).then(snap => { if (snap.exists()) setPrefs(snap.data()) })
+    getDoc(ref).then(snap => {
+      const data = snap.exists() ? snap.data() : null
+      if (data) setPrefs(data)
+      if (!data?.onboardingCompleted && !sessionStorage.getItem('onboardingShown')) {
+        setShowOnboarding(true)
+        sessionStorage.setItem('onboardingShown', '1')
+      }
+    })
   }, [user])
 
-  // Load trending row (always shown)
+  function handleOnboardingComplete() {
+    setShowOnboarding(false)
+    if (!user) return
+    const ref = doc(db, 'users', user.uid, 'profile', 'settings')
+    getDoc(ref).then(snap => { if (snap.exists()) setPrefs(snap.data()) })
+  }
+
+  // Always-on: Trending Now
   useEffect(() => {
     setTrendingLoading(true)
     fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`)
@@ -54,13 +71,22 @@ export default function PersonalizedHome() {
       .finally(() => setTrendingLoading(false))
   }, [])
 
-  // Build one row per genre preference, filtered by streaming services if set
+  // Always-on: Top Rated
+  useEffect(() => {
+    setTopRatedLoading(true)
+    fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}`)
+      .then(r => r.json())
+      .then(data => setTopRated((data?.results || []).filter(m => m.poster_path)))
+      .catch(() => {})
+      .finally(() => setTopRatedLoading(false))
+  }, [])
+
+  // One row per genre preference, filtered by streaming services if set
   useEffect(() => {
     if (!prefs?.favoriteGenres?.length) return
 
     const providerParam = buildProviderParam(prefs.streamingServices)
 
-    // Initialise rows in loading state, preserving preference order
     setGenreRows(
       prefs.favoriteGenres.map(id => ({
         genreId: id,
@@ -95,7 +121,6 @@ export default function PersonalizedHome() {
       <div className="homepage-inner">
         <WatchlistHero />
 
-        {/* One row per genre — hides if the filter returned no results */}
         {genreRows
           .filter(row => row.loading || row.movies.length > 0)
           .map(row => (
@@ -109,11 +134,23 @@ export default function PersonalizedHome() {
         }
 
         <MovieRow
-          title="New this week"
+          title="Trending Now"
           movies={trending}
           loading={trendingLoading}
         />
+
+        <MovieRow
+          title="Top Rated"
+          movies={topRated}
+          loading={topRatedLoading}
+        />
       </div>
+
+      <OnboardingModal
+        show={showOnboarding}
+        onComplete={handleOnboardingComplete}
+        allowCancel={false}
+      />
     </div>
   )
 }

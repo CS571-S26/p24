@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import '../App.css'
-import { Card, Row, Col, Button, ButtonGroup, Pagination, Spinner } from 'react-bootstrap'
+import { Card, Row, Col, Button, ButtonGroup, Pagination, Spinner, Carousel } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 import MovieSearchBar from '../components/MovieSearchBar'
 import LibraryButton from '../components/LibraryButton'
@@ -70,7 +70,6 @@ export default function BrowsePage() {
   const navigate  = useNavigate()
 
   const [movies,       setMovies]       = useState([])
-  const [selectedMovie, setSelectedMovie] = useState(null)
   const [query,        setQuery]        = useState('')
   const [activeQuery,  setActiveQuery]  = useState('')
   const [loading,      setLoading]      = useState(false)
@@ -105,7 +104,6 @@ export default function BrowsePage() {
           .filter(m => m?.poster_path && !seen.has(m.id) && seen.add(m.id))
 
         setMovies(results)
-        setSelectedMovie(results[0] || null)
         setPage(pageToLoad)
         // Our total UI pages = TMDB total_pages / 4, capped at 125 (500 TMDB max / 4)
         const tmdbTotal = dataArray[0]?.total_pages || 1
@@ -165,19 +163,29 @@ export default function BrowsePage() {
     <div className="homepage d-flex justify-content-center px-3 py-4">
       <div className="homepage-inner">
 
-        {selectedMovie && !loading && (
-          <section className="featured-movie mb-5" style={{ backgroundImage: `url(${getFeaturedImage(selectedMovie)})` }}>
-            <div className="featured-content">
-              <p className="eyebrow mb-2">FEATURED</p>
-              <h1 className="featured-title mb-3">{getTitle(selectedMovie)}</h1>
-              <div className="d-flex flex-wrap align-items-baseline gap-3">
-                <span className="rating-number">
-                  {selectedMovie.vote_average ? selectedMovie.vote_average.toFixed(1) : 'N/A'}
-                </span>
-                <span className="rating-label">/ 10</span>
-              </div>
-            </div>
-          </section>
+        {movies.length > 0 && !loading && (
+          <Carousel className="mb-5" interval={6000} pause="hover" touch={false}>
+            {movies.slice(0, 5).map(movie => (
+              <Carousel.Item key={movie.id}>
+                <section
+                  className="featured-movie"
+                  style={{ backgroundImage: `url(${getFeaturedImage(movie)})`, cursor: 'pointer' }}
+                  onClick={() => navigate(`/${movie.media_type || (activeFilters.mediaType === 'tv' ? 'tv' : 'movie')}/${movie.id}`)}
+                >
+                  <div className="featured-content">
+                    <p className="eyebrow mb-2">FEATURED</p>
+                    <h1 className="featured-title mb-3">{getTitle(movie)}</h1>
+                    <div className="d-flex flex-wrap align-items-baseline gap-3">
+                      <span className="rating-number">
+                        {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
+                      </span>
+                      <span className="rating-label">/ 10</span>
+                    </div>
+                  </div>
+                </section>
+              </Carousel.Item>
+            ))}
+          </Carousel>
         )}
 
         <section>
