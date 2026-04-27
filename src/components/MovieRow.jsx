@@ -1,8 +1,9 @@
 import { Spinner, Card } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import LibraryButton from './LibraryButton'
+import RecommendationReason from './RecommendationReason'
 
-export default function MovieRow({ title, movies, loading }) {
+export default function MovieRow({ title, movies, loading, reason }) {
   const navigate = useNavigate()
 
   return (
@@ -39,6 +40,7 @@ export default function MovieRow({ title, movies, loading }) {
                       {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
                     </div>
                     <Card.Title className="movie-card-title small mb-0">{label}</Card.Title>
+                    <RecommendationReason reason={reason} />
                     <LibraryButton movie={movie} />
                   </Card.Body>
                 </Card>

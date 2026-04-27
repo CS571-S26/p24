@@ -145,12 +145,14 @@ export default function PersonalizedHome() {
           title="Trending Now"
           movies={trending}
           loading={trendingLoading}
+          reason="Trending this week"
         />
 
         <MovieRow
           title="Top Rated"
           movies={topRated}
           loading={topRatedLoading}
+          reason="Highly rated"
         />
       </div>
 

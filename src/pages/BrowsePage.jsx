@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
+import { useLibrary } from '../context/LibraryContext'
 import MovieSearchBar from '../components/MovieSearchBar'
 import LibraryButton from '../components/LibraryButton'
 import SurpriseMeButton from '../components/SurpriseMeButton'
@@ -78,8 +79,10 @@ export default function BrowsePage() {
   const location  = useLocation()
   const navigate  = useNavigate()
   const { user }  = useAuth()
+  const { items } = useLibrary()
 
-  const [movies,         setMovies]         = useState([])
+  const [rawMovies,      setRawMovies]      = useState([])
+  const [includeWatched, setIncludeWatched] = useState(false)
   const [query,          setQuery]          = useState('')
   const [activeQuery,    setActiveQuery]    = useState('')
   const [loading,        setLoading]        = useState(false)
@@ -133,7 +136,7 @@ export default function BrowsePage() {
           .flatMap(d => d?.results || [])
           .filter(m => m?.poster_path && !seen.has(m.id) && seen.add(m.id))
 
-        setMovies(results)
+        setRawMovies(results)
         setPage(pageToLoad)
         // Our total UI pages = TMDB total_pages / 4, capped at 125 (500 TMDB max / 4)
         const tmdbTotal = dataArray[0]?.total_pages || 1
@@ -201,6 +204,11 @@ export default function BrowsePage() {
       ? `https://image.tmdb.org/t/p/original${m.backdrop_path}`
       : `https://image.tmdb.org/t/p/w780${m.poster_path}`
   }
+
+  const watchedIds = new Set(items.filter(i => i.status === 'watched').map(i => i.id))
+  const movies = (includeWatched || !user)
+    ? rawMovies
+    : rawMovies.filter(m => !watchedIds.has(m.id))
 
   const filtersActive = genres.length > 0 || mediaType !== 'both' || sort !== 'popularity.desc'
   const paginationRange = getPaginationRange(page, totalPages)
@@ -270,6 +278,16 @@ export default function BrowsePage() {
                 className="ms-2 text-warning"
               />
             )}
+            {user && (
+              <Form.Check
+                type="switch"
+                id="watched-toggle"
+                label="Include watched"
+                checked={includeWatched}
+                onChange={() => setIncludeWatched(v => !v)}
+                className="ms-2"
+              />
+            )}
           </div>
 
           {/* Genre chips */}
@@ -291,6 +309,11 @@ export default function BrowsePage() {
           </h2>
 
           {error && <p className="search-message mb-3">{error}</p>}
+          {!error && !loading && movies.length === 0 && rawMovies.length > 0 && (
+            <p className="search-message mb-3">
+              You've watched everything here. Toggle <strong>Include watched</strong> to see them again.
+            </p>
+          )}
 
           {loading ? (
             <div className="d-flex justify-content-center py-5">
