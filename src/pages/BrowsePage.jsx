@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
 import '../App.css'
-import { Card, Row, Col, Button, ButtonGroup, Pagination, Spinner, Carousel } from 'react-bootstrap'
+import { Card, Row, Col, Button, ButtonGroup, Pagination, Spinner, Carousel, Form } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db } from '../firebase'
+import { useAuth } from '../context/AuthContext'
 import MovieSearchBar from '../components/MovieSearchBar'
 import LibraryButton from '../components/LibraryButton'
+import SurpriseMeButton from '../components/SurpriseMeButton'
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
+
+const PROVIDER_IDS = {
+  netflix: 8, hbo: 1899, disney: 337, prime: 9, hulu: 15, apple: 2,
+}
 
 const GENRES = [
   { id: 28,    label: 'Action' },
@@ -28,11 +36,11 @@ const SORT_OPTIONS = [
   { key: 'primary_release_date.desc', label: 'Newest' },
 ]
 
-function buildEndpoint({ searchQuery, mediaType, genres, sort, page }) {
+function buildEndpoint({ searchQuery, mediaType, genres, sort, page, providerParam = '' }) {
   if (searchQuery) {
     return `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(searchQuery)}&page=${page}`
   }
-  const hasFilters = genres.length > 0 || mediaType !== 'both' || sort !== 'popularity.desc'
+  const hasFilters = genres.length > 0 || mediaType !== 'both' || sort !== 'popularity.desc' || !!providerParam
   if (!hasFilters) {
     return `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&page=${page}`
   }
@@ -42,6 +50,7 @@ function buildEndpoint({ searchQuery, mediaType, genres, sort, page }) {
   let url = `https://api.themoviedb.org/3/discover/${type}?api_key=${API_KEY}&sort_by=${resolvedSort}&page=${page}`
   if (genres.length > 0) url += `&with_genres=${genres.join(',')}`
   if (resolvedSort === 'vote_average.desc') url += '&vote_count.gte=200'
+  if (providerParam) url += `&with_watch_providers=${providerParam}&watch_region=US`
   return url
 }
 
@@ -68,32 +77,53 @@ const DEFAULT_FILTERS = { mediaType: 'both', genres: [], sort: 'popularity.desc'
 export default function BrowsePage() {
   const location  = useLocation()
   const navigate  = useNavigate()
+  const { user }  = useAuth()
 
-  const [movies,       setMovies]       = useState([])
-  const [query,        setQuery]        = useState('')
-  const [activeQuery,  setActiveQuery]  = useState('')
-  const [loading,      setLoading]      = useState(false)
-  const [error,        setError]        = useState('')
-  const [page,         setPage]         = useState(1)
-  const [totalPages,   setTotalPages]   = useState(1)
+  const [movies,         setMovies]         = useState([])
+  const [query,          setQuery]          = useState('')
+  const [activeQuery,    setActiveQuery]    = useState('')
+  const [loading,        setLoading]        = useState(false)
+  const [error,          setError]          = useState('')
+  const [page,           setPage]           = useState(1)
+  const [totalPages,     setTotalPages]     = useState(1)
 
-  const [mediaType, setMediaType] = useState('both')
-  const [genres,    setGenres]    = useState([])
-  const [sort,      setSort]      = useState('popularity.desc')
+  const [mediaType,     setMediaType]     = useState('both')
+  const [genres,        setGenres]        = useState([])
+  const [sort,          setSort]          = useState('popularity.desc')
   const [activeFilters, setActiveFilters] = useState(DEFAULT_FILTERS)
+
+  const [userServices,   setUserServices]   = useState([])
+  const [onlyAvailable,  setOnlyAvailable]  = useState(false)
+  const [servicesLoaded, setServicesLoaded] = useState(false)
+
+  // Load streaming prefs + toggle state from Firestore
+  useEffect(() => {
+    if (!user) { setServicesLoaded(true); return }
+    getDoc(doc(db, 'users', user.uid, 'profile', 'settings'))
+      .then(snap => {
+        const data = snap.data() || {}
+        setUserServices(data.streamingServices || [])
+        setOnlyAvailable(data.onlyAvailable ?? false)
+      })
+      .finally(() => setServicesLoaded(true))
+  }, [user])
 
   function toggleGenre(id) {
     setGenres(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id])
   }
 
   // Each UI page fetches 4 TMDB pages in parallel → ~80 results (20 rows at 4 columns)
-  function fetchPage({ searchQuery = '', pageToLoad = 1, filters = activeFilters }) {
+  function fetchPage({ searchQuery = '', pageToLoad = 1, filters = activeFilters, availableOnly = onlyAvailable }) {
     setLoading(true)
     setError('')
 
+    const providerParam = (availableOnly && userServices.length)
+      ? userServices.map(s => PROVIDER_IDS[s]).filter(Boolean).join('|')
+      : ''
+
     const tmdbPages = [0, 1, 2, 3].map(i => (pageToLoad - 1) * 4 + 1 + i)
     const requests  = tmdbPages.map(p =>
-      fetch(buildEndpoint({ searchQuery, ...filters, page: p })).then(r => r.json())
+      fetch(buildEndpoint({ searchQuery, ...filters, page: p, providerParam })).then(r => r.json())
     )
 
     Promise.all(requests)
@@ -109,7 +139,12 @@ export default function BrowsePage() {
         const tmdbTotal = dataArray[0]?.total_pages || 1
         setTotalPages(Math.ceil(Math.min(tmdbTotal, 500) / 4))
         setActiveQuery(searchQuery)
-        if (results.length === 0) setError('No results found.')
+        if (results.length === 0) {
+          setError(availableOnly
+            ? "Nothing on your streaming services matches right now. Try turning the filter off or adding more services in your Profile."
+            : 'No results found.'
+          )
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' })
       })
       .catch(() => setError('Unable to load movies right now.'))
@@ -138,7 +173,18 @@ export default function BrowsePage() {
     fetchPage({ searchQuery: query.trim(), pageToLoad: 1 })
   }
 
+  function handleAvailableToggle() {
+    const newVal = !onlyAvailable
+    setOnlyAvailable(newVal)
+    if (user) {
+      updateDoc(doc(db, 'users', user.uid, 'profile', 'settings'), { onlyAvailable: newVal }).catch(() => {})
+    }
+    fetchPage({ searchQuery: activeQuery, pageToLoad: 1, availableOnly: newVal })
+  }
+
+  // Wait for prefs to load before initial fetch so toggle state is correct
   useEffect(() => {
+    if (!servicesLoaded) return
     const incomingSearch = location.state?.searchQuery?.trim()
     if (typeof incomingSearch === 'string') {
       setQuery(incomingSearch)
@@ -146,7 +192,7 @@ export default function BrowsePage() {
     } else {
       fetchPage({ searchQuery: '', pageToLoad: 1 })
     }
-  }, [location.key])
+  }, [location.key, servicesLoaded])
 
   const getTitle = m => m?.name || m?.title || 'Untitled'
   const getFeaturedImage = m => {
@@ -189,7 +235,10 @@ export default function BrowsePage() {
         )}
 
         <section>
-          <MovieSearchBar query={query} onQueryChange={setQuery} onSearch={handleSearch} isSearching={loading} />
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <MovieSearchBar query={query} onQueryChange={setQuery} onSearch={handleSearch} isSearching={loading} />
+            <SurpriseMeButton variant="ghost" />
+          </div>
 
           {/* Media type + sort */}
           <div className="mb-3 d-flex flex-wrap gap-2 align-items-center">
@@ -210,6 +259,16 @@ export default function BrowsePage() {
             <Button size="sm" variant="warning" onClick={applyFilters}>Apply</Button>
             {filtersActive && (
               <Button size="sm" variant="outline-secondary" onClick={clearFilters}>Clear</Button>
+            )}
+            {user && userServices.length > 0 && (
+              <Form.Check
+                type="switch"
+                id="available-toggle"
+                label="Only what I can watch"
+                checked={onlyAvailable}
+                onChange={handleAvailableToggle}
+                className="ms-2 text-warning"
+              />
             )}
           </div>
 

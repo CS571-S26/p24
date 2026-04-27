@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { Button } from 'react-bootstrap'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import WatchlistHero from '../components/WatchlistHero'
 import MovieRow from '../components/MovieRow'
 import OnboardingModal from '../components/OnboardingModal'
+import SurpriseMeButton from '../components/SurpriseMeButton'
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
@@ -120,6 +123,11 @@ export default function PersonalizedHome() {
     <div className="homepage d-flex justify-content-center px-3 py-4">
       <div className="homepage-inner">
         <WatchlistHero />
+
+        <div className="d-flex justify-content-center gap-3 mb-4">
+          <SurpriseMeButton variant="primary" />
+          <Button as={Link} to="/pick" variant="outline-warning">Pick for Me</Button>
+        </div>
 
         {genreRows
           .filter(row => row.loading || row.movies.length > 0)

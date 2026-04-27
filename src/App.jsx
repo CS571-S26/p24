@@ -5,6 +5,7 @@ import AboutPage from './pages/AboutPage.jsx'
 import LibraryPage from './pages/LibraryPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import BrowsePage from './pages/BrowsePage.jsx'
+import PickForMePage from './pages/PickForMePage.jsx'
 import SignInPage from './pages/SignInPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import MovieDetailPage from './pages/MovieDetailPage.jsx'
@@ -18,6 +19,7 @@ function App() {
         <Route path="movie/:id" element={<MovieDetailPage mediaType="movie" />} />
         <Route path="tv/:id" element={<MovieDetailPage mediaType="tv" />} />
         <Route path="browse" element={<BrowsePage />} />
+        <Route path="pick" element={<PickForMePage />} />
         <Route path="library" element={<LibraryPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="sign-in" element={<SignInPage />} />
