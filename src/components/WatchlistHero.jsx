@@ -26,9 +26,9 @@ export default function WatchlistHero() {
   const { getItemsByStatus } = useLibrary()
   const [tonightsPicks, setTonightsPicks] = useState([])
 
-  const watchlist = [...getItemsByStatus('watchlist')].sort((a, b) =>
-    (a.addedAt?.seconds ?? 0) - (b.addedAt?.seconds ?? 0)
-  )
+  const watchlist = [...getItemsByStatus('watchlist')]
+    .sort((a, b) => (a.addedAt?.seconds ?? 0) - (b.addedAt?.seconds ?? 0))
+    .slice(0, 5)
 
   useEffect(() => {
     if (watchlist.length > 0) return

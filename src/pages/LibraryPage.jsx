@@ -6,10 +6,17 @@ import { useLibrary } from '../context/LibraryContext'
 import LibraryButton from '../components/LibraryButton'
 
 const TABS = [
-  { key: 'watchlist', title: 'Plan to Watch' },
-  { key: 'watching',  title: 'Currently Watching' },
-  { key: 'watched',   title: 'Watched' },
+  { key: 'watchlist', title: 'Plan to Watch',      sort: 'asc' },
+  { key: 'watching',  title: 'Currently Watching', sort: 'desc' },
+  { key: 'watched',   title: 'Watched',            sort: 'desc' },
 ]
+
+function sortItems(items, direction) {
+  return [...items].sort((a, b) => {
+    const diff = (a.addedAt?.seconds ?? 0) - (b.addedAt?.seconds ?? 0)
+    return direction === 'asc' ? diff : -diff
+  })
+}
 
 function LibraryGrid({ items }) {
   const navigate = useNavigate()
@@ -81,11 +88,14 @@ export default function LibraryPage() {
           onSelect={k => setActiveTab(k)}
           className="mb-4 px-2"
         >
-          {TABS.map(({ key, title }) => (
-            <Tab key={key} eventKey={key} title={`${title} (${getItemsByStatus(key).length})`}>
-                  <LibraryGrid items={getItemsByStatus(key)} />
-            </Tab>
-          ))}
+          {TABS.map(({ key, title, sort }) => {
+            const items = sortItems(getItemsByStatus(key), sort)
+            return (
+              <Tab key={key} eventKey={key} title={`${title} (${items.length})`}>
+                <LibraryGrid items={items} />
+              </Tab>
+            )
+          })}
         </Tabs>
       </Container>
     </div>
