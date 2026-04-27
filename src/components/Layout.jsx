@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Navbar, Container, Form, Button, NavDropdown, Modal, Toast, ToastContainer } from 'react-bootstrap'
+import { Navbar, Container, Form, Button, NavDropdown, Modal, Toast, ToastContainer, Badge } from 'react-bootstrap'
 import '../App.css'
 import { useAuth, toUsername } from '../context/AuthContext'
+import { useLibrary } from '../context/LibraryContext'
 
 export default function Layout() {
   const [globalQuery, setGlobalQuery] = useState('')
@@ -11,6 +12,8 @@ export default function Layout() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user, signOut } = useAuth()
+  const { getItemsByStatus } = useLibrary()
+  const watchlistCount = user ? getItemsByStatus('watchlist').length : 0
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -43,7 +46,20 @@ export default function Layout() {
           <nav className="d-flex align-items-center gap-1 flex-wrap">
             <NavLink to="/" end className={getTabClass}>Home</NavLink>
             {user && <NavLink to="/browse" className={getTabClass}>Browse</NavLink>}
-            <NavLink to="/library" className={getTabClass}>Library</NavLink>
+            <NavLink to="/library" className={getTabClass}>
+              Library
+              {watchlistCount > 0 && (
+                <Badge
+                  bg="warning"
+                  pill
+                  text="dark"
+                  className="ms-2"
+                  aria-label={`${watchlistCount > 99 ? '99+' : watchlistCount} ${watchlistCount === 1 ? 'item' : 'items'} in watchlist`}
+                >
+                  {watchlistCount > 99 ? '99+' : watchlistCount}
+                </Badge>
+              )}
+            </NavLink>
             <NavLink to="/about" className={getTabClass}>About</NavLink>
           </nav>
 
