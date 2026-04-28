@@ -56,11 +56,11 @@ export default function MovieDetailPage({ mediaType }) {
         <MovieHero movie={movie} mediaType={mediaType} />
         <MovieSynopsis overview={movie.overview} />
         <GenrePills genres={movie.genres} />
+        <ReviewsList reviews={movie.reviews} />
         <WatchProviders providers={movie['watch/providers']} />
         <TrailerEmbed videos={movie.videos} />
         <CastList cast={movie.credits?.cast} />
         <CrewLine crew={movie.credits?.crew} />
-        <ReviewsList reviews={movie.reviews} />
         <RecommendationsRow recommendations={movie.recommendations} mediaType={mediaType} />
       </div>
     </div>

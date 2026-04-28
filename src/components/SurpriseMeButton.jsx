@@ -12,7 +12,7 @@ const PROVIDER_IDS = {
   netflix: 8, hbo: 1899, disney: 337, prime: 9, hulu: 15, apple: 2,
 }
 
-export default function SurpriseMeButton({ variant = 'primary' }) {
+export default function SurpriseMeButton({ variant = 'primary', className = '' }) {
   const navigate   = useNavigate()
   const { user }   = useAuth()
   const { items }  = useLibrary()
@@ -66,6 +66,7 @@ export default function SurpriseMeButton({ variant = 'primary' }) {
       variant={variant === 'ghost' ? 'outline-warning' : 'warning'}
       onClick={handleClick}
       disabled={loading}
+      className={className}
     >
       {loading
         ? <><Spinner animation="border" size="sm" className="me-2" role="status" /><span className="visually-hidden">Finding a movie…</span>Searching…</>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
+import { useLibrary } from '../context/LibraryContext'
 import WatchlistHero from '../components/WatchlistHero'
 import MovieRow from '../components/MovieRow'
 import OnboardingModal from '../components/OnboardingModal'
-import SurpriseMeButton from '../components/SurpriseMeButton'
+import LiquidButton from '../components/LiquidButton'
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
@@ -35,6 +36,8 @@ function buildProviderParam(services) {
 
 export default function PersonalizedHome() {
   const { user } = useAuth()
+  const { items } = useLibrary()
+  const navigate = useNavigate()
   const [prefs,           setPrefs]           = useState(null)
   const [showOnboarding,  setShowOnboarding]  = useState(false)
   const [genreRows,       setGenreRows]       = useState([])
@@ -42,6 +45,50 @@ export default function PersonalizedHome() {
   const [trendingLoading, setTrendingLoading] = useState(true)
   const [topRated,        setTopRated]        = useState([])
   const [topRatedLoading, setTopRatedLoading] = useState(true)
+  const [surpriseLoading, setSurpriseLoading] = useState(false)
+
+  async function handleSurpriseMe() {
+    setSurpriseLoading(true)
+    try {
+      let providerParam = ''
+      if (user) {
+        const snap = await getDoc(doc(db, 'users', user.uid, 'profile', 'settings'))
+        const data = snap.data() || {}
+        if (data.onlyAvailable && data.streamingServices?.length) {
+          const ids = data.streamingServices.map(s => PROVIDER_IDS[s]).filter(Boolean)
+          if (ids.length) providerParam = ids.join('|')
+        }
+      }
+
+      const watchedIds = new Set(
+        items.filter(i => i.status === 'watched').map(i => i.id)
+      )
+
+      const page = Math.floor(Math.random() * 5) + 1
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&vote_average.gte=7&page=${page}`
+      if (providerParam) url += `&with_watch_providers=${providerParam}&watch_region=US`
+
+      const data = await fetch(url).then(r => r.json())
+      let results = (data?.results || []).filter(m => m.poster_path && !watchedIds.has(m.id))
+
+      // If streaming filter yields nothing, retry without provider constraint
+      if (results.length === 0 && providerParam) {
+        const fallback = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&vote_average.gte=7&page=${page}`
+        ).then(r => r.json())
+        results = (fallback?.results || []).filter(m => m.poster_path && !watchedIds.has(m.id))
+      }
+
+      if (!results.length) return
+
+      const pick = results[Math.floor(Math.random() * results.length)]
+      navigate(`/movie/${pick.id}`)
+    } catch {
+      // silently no-op on network error
+    } finally {
+      setSurpriseLoading(false)
+    }
+  }
 
   // Load prefs + auto-open onboarding once per session if not completed
   useEffect(() => {
@@ -124,9 +171,20 @@ export default function PersonalizedHome() {
       <div className="homepage-inner">
         <WatchlistHero />
 
-        <div className="d-flex justify-content-center gap-3 mb-4">
-          <SurpriseMeButton variant="primary" />
-          <Button as={Link} to="/pick" variant="outline-warning">Pick for Me</Button>
+        {/* ── CTA section directly below hero ── */}
+        <div className="cta-section">
+          <p className="cta-eyebrow">Not sure what to watch tonight?</p>
+          <div className="cta-buttons">
+            <LiquidButton onClick={() => navigate('/pick')}>
+              🎯 Pick for Me
+            </LiquidButton>
+            <LiquidButton onClick={handleSurpriseMe} disabled={surpriseLoading}>
+              {surpriseLoading ? '🔍 Finding…' : '🎲 Surprise Me'}
+            </LiquidButton>
+          </div>
+          <Link to="/browse" className="cta-browse-link">
+            Browse all movies →
+          </Link>
         </div>
 
         {genreRows

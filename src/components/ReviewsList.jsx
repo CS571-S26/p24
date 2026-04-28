@@ -3,6 +3,54 @@ import { Card, Badge } from 'react-bootstrap'
 
 const TRUNCATE_LENGTH = 300
 
+const POSITIVE_WORDS = [
+  'masterpiece', 'brilliant', 'outstanding', 'incredible', 'stunning',
+  'gripping', 'excellent', 'fantastic', 'amazing', 'beautiful',
+  'perfect', 'superb', 'compelling', 'mesmerizing', 'unforgettable',
+  'loved', 'breathtaking', 'riveting', 'exceptional', 'powerful'
+]
+
+const NEGATIVE_WORDS = [
+  'disappointing', 'boring', 'terrible', 'waste', 'predictable',
+  'dull', 'awful', 'weak', 'poor', 'bland', 'forgettable',
+  'overrated', 'mediocre', 'painful', 'unwatchable', 'tedious',
+  'ridiculous', 'pointless', 'horrible', 'disaster'
+]
+
+function highlightText(text) {
+  const allWords = [...POSITIVE_WORDS, ...NEGATIVE_WORDS]
+  const regex = new RegExp(`\\b(${allWords.join('|')})\\b`, 'gi')
+
+  const segments = []
+  let lastIndex = 0
+  let match
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, match.index), type: 'plain' })
+    }
+    const isPositive = POSITIVE_WORDS.some(w => w.toLowerCase() === match[0].toLowerCase())
+    segments.push({ text: match[0], type: isPositive ? 'positive' : 'negative' })
+    lastIndex = regex.lastIndex
+  }
+
+  if (lastIndex < text.length) {
+    segments.push({ text: text.slice(lastIndex), type: 'plain' })
+  }
+
+  return segments
+}
+
+function renderHighlighted(text) {
+  return highlightText(text).map((seg, i) => {
+    if (seg.type === 'positive')
+      return <mark key={i} className="review-highlight review-highlight-positive">{seg.text}</mark>
+    if (seg.type === 'negative')
+      return <mark key={i} className="review-highlight review-highlight-negative">{seg.text}</mark>
+    return seg.text
+  })
+}
+
 function ReviewCard({ review }) {
   const [expanded, setExpanded] = useState(false)
   const content = review.content || ''
@@ -22,7 +70,10 @@ function ReviewCard({ review }) {
         </span>
       </div>
       <p className="text-light mb-1" style={{ fontSize: '0.9rem', whiteSpace: 'pre-line' }}>
-        {expanded || !isTruncated ? content : `${content.slice(0, TRUNCATE_LENGTH)}…`}
+        {expanded || !isTruncated
+          ? renderHighlighted(content)
+          : renderHighlighted(`${content.slice(0, TRUNCATE_LENGTH)}…`)
+        }
       </p>
       {isTruncated && (
         <button

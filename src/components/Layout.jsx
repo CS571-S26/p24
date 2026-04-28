@@ -39,7 +39,7 @@ export default function Layout() {
     <div>
       <Navbar bg="dark" variant="dark" expand="lg" className="py-3">
         <Container fluid className="justify-content-center align-items-center gap-3 flex-wrap">
-          <Navbar.Brand as={Link} to="/" className="fw-bold text-white mb-0">
+          <Navbar.Brand as={Link} to="/" className="mb-0 brand-logo">
             MOViE?
           </Navbar.Brand>
 

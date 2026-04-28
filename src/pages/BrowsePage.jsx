@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import { useLibrary } from '../context/LibraryContext'
 import MovieSearchBar from '../components/MovieSearchBar'
 import LibraryButton from '../components/LibraryButton'
-import SurpriseMeButton from '../components/SurpriseMeButton'
+import LiquidButton from '../components/LiquidButton'
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
@@ -98,6 +98,50 @@ export default function BrowsePage() {
   const [userServices,   setUserServices]   = useState([])
   const [onlyAvailable,  setOnlyAvailable]  = useState(false)
   const [servicesLoaded, setServicesLoaded] = useState(false)
+  const [surpriseLoading, setSurpriseLoading] = useState(false)
+
+  async function handleSurpriseMe() {
+    setSurpriseLoading(true)
+    try {
+      let providerParam = ''
+      if (user) {
+        const snap = await getDoc(doc(db, 'users', user.uid, 'profile', 'settings'))
+        const data = snap.data() || {}
+        if (data.onlyAvailable && data.streamingServices?.length) {
+          const ids = data.streamingServices.map(s => PROVIDER_IDS[s]).filter(Boolean)
+          if (ids.length) providerParam = ids.join('|')
+        }
+      }
+
+      const watchedIds = new Set(
+        items.filter(i => i.status === 'watched').map(i => i.id)
+      )
+
+      const page = Math.floor(Math.random() * 5) + 1
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&vote_average.gte=7&page=${page}`
+      if (providerParam) url += `&with_watch_providers=${providerParam}&watch_region=US`
+
+      const data = await fetch(url).then(r => r.json())
+      let results = (data?.results || []).filter(m => m.poster_path && !watchedIds.has(m.id))
+
+      // If streaming filter yields nothing, retry without provider constraint
+      if (results.length === 0 && providerParam) {
+        const fallback = await fetch(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&vote_average.gte=7&page=${page}`
+        ).then(r => r.json())
+        results = (fallback?.results || []).filter(m => m.poster_path && !watchedIds.has(m.id))
+      }
+
+      if (!results.length) return
+
+      const pick = results[Math.floor(Math.random() * results.length)]
+      navigate(`/movie/${pick.id}`)
+    } catch {
+      // silently no-op on network error
+    } finally {
+      setSurpriseLoading(false)
+    }
+  }
 
   // Load streaming prefs + toggle state from Firestore
   useEffect(() => {
@@ -242,10 +286,19 @@ export default function BrowsePage() {
           </Carousel>
         )}
 
+        {/* ── Guest CTA section ── */}
+        <div className="cta-section">
+          <p className="cta-eyebrow">Don't know what to watch?</p>
+          <div className="cta-buttons">
+            <LiquidButton onClick={handleSurpriseMe} disabled={surpriseLoading}>
+              {surpriseLoading ? '🔍 Finding…' : '🎲 Surprise Me'}
+            </LiquidButton>
+          </div>
+        </div>
+
         <section>
-          <div className="d-flex align-items-center gap-3 mb-3">
+          <div className="mb-3 d-flex flex-wrap gap-2 align-items-center">
             <MovieSearchBar query={query} onQueryChange={setQuery} onSearch={handleSearch} isSearching={loading} />
-            <SurpriseMeButton variant="ghost" />
           </div>
 
           {/* Media type + sort */}
@@ -358,6 +411,7 @@ export default function BrowsePage() {
               </Pagination>
             </div>
           )}
+          
         </section>
       </div>
     </div>
