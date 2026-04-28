@@ -56,7 +56,8 @@ export default function WatchlistHero() {
             <Carousel.Item key={pick.id}>
               <section
                 className="featured-movie"
-                style={{ backgroundImage: `url(${backdropUrl})`, cursor: 'default' }}
+                style={{ backgroundImage: `url(${backdropUrl})`, cursor: 'pointer' }}
+                onClick={() => navigate(`/${pick.media_type || 'movie'}/${pick.id}`)}
               >
                 <div className="featured-content">
                   <p className="eyebrow mb-2">Tonight's Pick</p>
@@ -96,9 +97,10 @@ export default function WatchlistHero() {
             <section
               className="featured-movie"
               style={backdropUrl
-                ? { backgroundImage: `url(${backdropUrl})`, cursor: 'default' }
-                : { backgroundImage: 'linear-gradient(135deg, #1a1a2e, #16213e)', cursor: 'default' }
+                ? { backgroundImage: `url(${backdropUrl})`, cursor: 'pointer' }
+                : { backgroundImage: 'linear-gradient(135deg, #1a1a2e, #16213e)', cursor: 'pointer' }
               }
+              onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
             >
               <div className="featured-content">
                 <p className="eyebrow mb-2">{caption}</p>

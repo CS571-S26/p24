@@ -169,6 +169,7 @@ export default function PersonalizedHome() {
   return (
     <div className="homepage d-flex justify-content-center px-3 py-4">
       <div className="homepage-inner">
+        <h1 className="visually-hidden">Your Home</h1>
         <WatchlistHero />
 
         {/* ── CTA section directly below hero ── */}

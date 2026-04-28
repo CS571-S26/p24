@@ -139,6 +139,7 @@ main {
 	position: absolute;
 	inset: 0;
 	background: rgba(7, 10, 14, 0.5);
+	pointer-events: none;
 }
 
 .featured-content {
