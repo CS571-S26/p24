@@ -17,6 +17,16 @@ dist
 dist-ssr
 *.local
 
+# Personal study material — not for the public repo
+CS571 S26 Syllabus.pdf
+HW_md/
+Lecture_Notes_md/
+desktop.ini
+.claude/
+CLAUDE_CODE_PROMPTS.md
+HANDOFF.md
+NEXT_STEPS.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
