@@ -56,16 +56,16 @@ export default function WatchlistHero() {
             <Carousel.Item key={pick.id}>
               <section
                 className="featured-movie"
-                style={{ backgroundImage: `url(${backdropUrl})`, cursor: 'pointer' }}
-                onClick={() => navigate(`/${pick.media_type || 'movie'}/${pick.id}`)}
+                style={{ backgroundImage: `url(${backdropUrl})`, cursor: 'default' }}
               >
                 <div className="featured-content">
                   <p className="eyebrow mb-2">Tonight's Pick</p>
                   <h1 className="featured-title mb-4">{pick.title || pick.name}</h1>
-                  <div className="d-flex flex-wrap gap-3 align-items-center" onClick={e => e.stopPropagation()}>
+                  <div className="d-flex flex-wrap gap-3 align-items-center" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
                     <Button
                       variant="warning"
-                      onClick={() => navigate(`/${pick.media_type || 'movie'}/${pick.id}`)}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/${pick.media_type || 'movie'}/${pick.id}`); }}
+                      onMouseDown={(e) => e.stopPropagation()}
                     >
                       Watch Now
                     </Button>
@@ -96,18 +96,18 @@ export default function WatchlistHero() {
             <section
               className="featured-movie"
               style={backdropUrl
-                ? { backgroundImage: `url(${backdropUrl})`, cursor: 'pointer' }
-                : { backgroundImage: 'linear-gradient(135deg, #1a1a2e, #16213e)', cursor: 'pointer' }
+                ? { backgroundImage: `url(${backdropUrl})`, cursor: 'default' }
+                : { backgroundImage: 'linear-gradient(135deg, #1a1a2e, #16213e)', cursor: 'default' }
               }
-              onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
             >
               <div className="featured-content">
                 <p className="eyebrow mb-2">{caption}</p>
                 <h1 className="featured-title mb-4">{item.title}</h1>
-                <div className="d-flex flex-wrap gap-3 align-items-center" onClick={e => e.stopPropagation()}>
+                <div className="d-flex flex-wrap gap-3 align-items-center" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
                   <Button
                     variant="warning"
-                    onClick={() => navigate(`/${item.media_type || 'movie'}/${item.id}`)}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/${item.media_type || 'movie'}/${item.id}`); }}
+                    onMouseDown={(e) => e.stopPropagation()}
                   >
                     Watch Now
                   </Button>

@@ -1,4 +1,4 @@
-import { Container, Card, Row, Col, Badge } from 'react-bootstrap'
+import { Badge } from 'react-bootstrap'
 import '../App.css'
 
 const STACK = [
@@ -14,56 +14,48 @@ const STACK = [
 
 export default function AboutPage() {
   return (
-    <div className="w-100 d-flex justify-content-center align-items-start py-4 px-3">
-      <Container className="p-0" style={{ maxWidth: '800px' }}>
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '2rem 1rem' }}>
+      <div style={{ width: '100%', maxWidth: '800px', position: 'relative' }}>
 
-        <Card className="m-2 p-2 mb-4">
-          <Card.Body>
-            <h1 className="mb-3">About MOViE?</h1>
-            <p className="mb-0">
-              It's almost midnight. The food is ready, the lights are dimmed — but your hand keeps
-              scrolling endlessly trying to find something worth watching. <strong>MOViE?</strong> is
-              designed to solve exactly that. Search trending movies and TV shows, get full details
-              including cast, trailer, and where to stream, and save anything you like to your
-              personal watchlist.
-            </p>
-          </Card.Body>
-        </Card>
+        <div className="glass-card mb-4">
+          <h1 className="mb-3" style={{ fontSize: '2rem', fontFamily: "'Oswald', system-ui, sans-serif", fontWeight: 700, color: "#f5c518" }}>About MOViE?</h1>
+          <p className="mb-0" style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            It's almost midnight. The food is ready, the lights are dimmed — but your hand keeps
+            scrolling endlessly trying to find something worth watching. <strong style={{ color: '#f5c518'}}>MOViE?</strong> is
+            designed to solve exactly that. Search trending movies and TV shows, get full details
+            including cast, trailer, and where to stream, and save anything you like to your
+            personal watchlist.
+          </p>
+        </div>
 
-        <Card className="m-2 p-2 mb-4">
-          <Card.Body>
-            <h2 className="mb-3">Tech Stack</h2>
-            <Row className="g-2">
-              {STACK.map(item => (
-                <Col key={item.name} xs={12} sm={6}>
-                  <div className="d-flex align-items-center gap-2">
-                    <Badge bg="warning" text="dark" className="flex-shrink-0">{item.name}</Badge>
-                    <span className="text-muted small">{item.desc}</span>
-                  </div>
-                </Col>
-              ))}
-            </Row>
-            <p className="text-muted small mt-3 mb-0">
-              Movie and TV data provided by{' '}
-              <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer">
-                TMDB
-              </a>
-              . This product uses the TMDB API but is not endorsed or certified by TMDB.
-            </p>
-          </Card.Body>
-        </Card>
+        <div className="glass-card mb-4">
+          <h2 className="mb-3" style={{ fontSize: '1.6rem', fontFamily: "'Oswald', system-ui, sans-serif", fontWeight: 700 }}>Tech Stack</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            {STACK.map(item => (
+              <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Badge bg="warning" text="dark" style={{ fontSize: '0.9rem', padding: '0.5rem 0.8rem', flexShrink: 0 }}>{item.name}</Badge>
+                <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.95rem' }}>{item.desc}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem', marginBottom: 0 }}>
+            Movie and TV data provided by{' '}
+            <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer" style={{ color: '#f5c518', textDecoration: 'none' }}>
+              TMDB
+            </a>
+            . This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </p>
+        </div>
 
-        <Card className="m-2 p-2">
-          <Card.Body>
-            <h2 className="mb-2">Developer</h2>
-            <p className="mb-0">
-              Built by <strong>Hazim Shah and Amirul Azmi</strong> for CS571 — Building User Interfaces,
-              UW–Madison, Spring 2026.
-            </p>
-          </Card.Body>
-        </Card>
+        <div className="glass-card">
+          <h2 className="mb-2" style={{ fontSize: '1.6rem', fontFamily: "'Oswald', system-ui, sans-serif", fontWeight: 700 }}>Developer</h2>
+          <p className="mb-0" style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            Built by <strong>Hazim Shah and Amirul Azmi</strong> for CS571 — Building User Interfaces,
+            UW–Madison, Spring 2026.
+          </p>
+        </div>
 
-      </Container>
+      </div>
     </div>
   )
 }

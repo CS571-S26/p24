@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Container, Card, Row, Col, Button, Badge, Modal, Toast, ToastContainer } from 'react-bootstrap'
+import { Button, Badge, Modal, Toast, ToastContainer } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -56,14 +56,12 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="w-100 d-flex justify-content-center align-items-start py-4 px-3">
-        <Container className="p-0" style={{ maxWidth: '600px' }}>
-          <Card className="m-2 p-2 text-center">
-            <Card.Body>
-              <p className="text-muted mb-0">Sign in to view your profile.</p>
-            </Card.Body>
-          </Card>
-        </Container>
+      <div className="profile-page">
+        <div className="profile-wrapper">
+          <div className="glass-card text-center">
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: 0 }}>Sign in to view your profile.</p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -77,98 +75,95 @@ export default function ProfilePage() {
   const watchedCount  = getItemsByStatus('watched').length
 
   return (
-    <div className="w-100 d-flex justify-content-center align-items-start py-4 px-3">
-      <Container className="p-0" style={{ maxWidth: '700px' }}>
+    <div className="profile-page">
+      <div className="profile-wrapper">
 
-        <Card className="m-2 p-2 mb-4">
-          <Card.Body>
-            <h1 className="mb-1">{toUsername(user.email)}</h1>
-            {createdDate && (
-              <p className="text-muted small mb-0">Member since {createdDate}</p>
-            )}
-          </Card.Body>
-        </Card>
+        {/* Primary card — identity + stats */}
+        <div className="glass-card text-center" style={{ position: 'relative' }}>
+          <div className="glass-card-glow" />
 
-        <Card className="m-2 p-2 mb-4">
-          <Card.Body>
-            <h2 className="mb-3 fs-5">Library</h2>
-            <Row className="g-3 text-center">
-              <Col xs={4}>
-                <div className="fw-bold fs-3">{planCount}</div>
-                <div className="text-muted small">Plan to Watch</div>
-              </Col>
-              <Col xs={4}>
-                <div className="fw-bold fs-3">{watchingCount}</div>
-                <div className="text-muted small">Watching</div>
-              </Col>
-              <Col xs={4}>
-                <div className="fw-bold fs-3">{watchedCount}</div>
-                <div className="text-muted small">Watched</div>
-              </Col>
-            </Row>
-          </Card.Body>
-        </Card>
+          {/* Avatar — username initial */}
+          <div className="profile-avatar">
+            {toUsername(user.email).charAt(0).toUpperCase()}
+          </div>
 
-        {prefs && (
-          <Card className="m-2 p-2 mb-4">
-            <Card.Body>
-              <h2 className="mb-3 fs-5">Preferences</h2>
+          <h1 className="profile-username">{toUsername(user.email)}</h1>
+          {createdDate && (
+            <p className="profile-since">Member since {createdDate}</p>
+          )}
 
+          <hr className="glass-divider" />
+
+          {/* Library stats */}
+          <p className="glass-section-label">Library</p>
+          <div className="profile-stats">
+            <div className="profile-stat">
+              <div className="profile-stat-number">{planCount}</div>
+              <div className="profile-stat-label">Plan to Watch</div>
+            </div>
+            <div className="profile-stat">
+              <div className="profile-stat-number">{watchingCount}</div>
+              <div className="profile-stat-label">Watching</div>
+            </div>
+            <div className="profile-stat">
+              <div className="profile-stat-number">{watchedCount}</div>
+              <div className="profile-stat-label">Watched</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Preferences card */}
+        <div className="glass-card">
+          <p className="glass-section-label">Preferences</p>
+
+          {prefs ? (
+            <>
               {prefs.favoriteGenres?.length > 0 && (
-                <div className="mb-2">
-                  <span className="text-muted small me-2">Genres:</span>
-                  <div className="d-inline-flex flex-wrap gap-1">
-                    {prefs.favoriteGenres.map(id => (
-                      <Badge key={id} bg="secondary">{GENRE_LABELS[id] ?? id}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="mb-2">
-                <span className="text-muted small me-2">Shows:</span>
-                <Badge bg="warning" text="dark">{prefs.mediaPreference || 'both'}</Badge>
-              </div>
-
-              {prefs.streamingServices?.length > 0 && (
                 <div className="mb-3">
-                  <span className="text-muted small me-2">Streaming:</span>
-                  <div className="d-inline-flex flex-wrap gap-1">
-                    {prefs.streamingServices.map(id => (
-                      <Badge key={id} bg="secondary">{SERVICE_LABELS[id] ?? id}</Badge>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '1rem' }} className="me-2">Genres:</span>
+                  <div className="d-inline-flex flex-wrap gap-2 justify-content-center">
+                    {prefs.favoriteGenres.map(id => (
+                      <Badge key={id} bg="secondary" style={{ fontSize: '0.95rem' }}>{GENRE_LABELS[id] ?? id}</Badge>
                     ))}
                   </div>
                 </div>
               )}
-
+              <div className="mb-3">
+                <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '1rem' }} className="me-2">Shows:</span>
+                <Badge bg="warning" text="dark" style={{ fontSize: '0.95rem' }}>{prefs.mediaPreference || 'both'}</Badge>
+              </div>
+              {prefs.streamingServices?.length > 0 && (
+                <div className="mb-4">
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '1rem' }} className="me-2">Streaming:</span>
+                  <div className="d-inline-flex flex-wrap gap-2 justify-content-center">
+                    {prefs.streamingServices.map(id => (
+                      <Badge key={id} bg="secondary" style={{ fontSize: '0.95rem' }}>{SERVICE_LABELS[id] ?? id}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
               <Button variant="outline-warning" size="sm" onClick={() => setShowOnboarding(true)}>
                 Edit Preferences
               </Button>
-            </Card.Body>
-          </Card>
-        )}
-
-        {!prefs && (
-          <Card className="m-2 p-2 mb-4">
-            <Card.Body>
-              <h2 className="mb-2 fs-5">Preferences</h2>
-              <p className="text-muted small mb-3">You haven't set up your preferences yet.</p>
+            </>
+          ) : (
+            <>
+              <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '1rem' }} className="mb-3">You haven't set up your preferences yet.</p>
               <Button variant="warning" size="sm" onClick={() => setShowOnboarding(true)}>
                 Set Up Preferences
               </Button>
-            </Card.Body>
-          </Card>
-        )}
+            </>
+          )}
+        </div>
 
-        <Card className="m-2 p-2">
-          <Card.Body>
-            <Button variant="outline-danger" onClick={() => setShowConfirm(true)}>
-              Sign Out
-            </Button>
-          </Card.Body>
-        </Card>
+        {/* Sign out card */}
+        <div className="glass-card">
+          <Button variant="outline-danger" onClick={() => setShowConfirm(true)}>
+            Sign Out
+          </Button>
+        </div>
 
-      </Container>
+      </div>
 
       <OnboardingModal
         show={showOnboarding}
