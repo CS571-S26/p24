@@ -32,7 +32,7 @@ export default function Layout() {
 
   const handleGlobalSearch = e => {
     e.preventDefault()
-    navigate('/', { state: { searchQuery: globalQuery.trim() } })
+    navigate('/browse', { state: { searchQuery: globalQuery.trim() } })
   }
 
   return (
